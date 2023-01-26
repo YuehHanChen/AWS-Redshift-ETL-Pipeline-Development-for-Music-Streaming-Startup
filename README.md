@@ -82,28 +82,36 @@ Below are steps you can follow to complete each component of this project.
 
 ## How to run scripts
 
-Set environment variables `KEY` and `SECRET`.
-
-Choose `DB/DB_PASSWORD` in `dhw.cfg`.
-
-Create IAM role, Redshift cluster, connect to S3 bucket and configure TCP connectivity  
-
-Drop and recreate tables
-
-```bash
-$ python create_tables.py
-```
-
-Run ETL pipeline
-
-```bash
-$ python etl.py
-```  
-
-Validate the tables  
-* Run test.ipynb  
-* Open the Amazon Redshift and use the database info to make a connection.  
-* Execute query in test.ipynb to check the tables.  
+1. Set environment variables `KEY` and `SECRET`.
+2. Run create_redshift_cluster.ipynb to create IAM role, Redshift cluster, connect to S3 bucket and configure TCP connectivity  
+3. Set `HOST & ARN` in `dhw.cfg`.
+4. Run create_tables.py to create tables
+5. Run etl.py to load data from S3 to staging tables on Redshift and load data from staging tables to analytics tables on Redshift
+6. Validate the tables  
+    * Run connect_to_db.ipynb  
+    * Execute query in connect_to_db.ipynb to check the tables.  
+7. Delete IAM role and Redshift cluster
 
 
-Delete IAM role and Redshift cluster
+# Sample Query:
+1. Top-10 most played songs.
+Query:
+
+  SELECT sp.song_id, s.title, count(*) AS cnt 
+    FROM songplays sp
+    JOIN songs s
+      ON sp.song_id = s.song_id
+GROUP BY 1, 2
+ORDER BY 3 DESC
+   LIMIT 10;
+   
+2. Top-10 most played artists.
+Query:
+
+  SELECT sp.artist_id, a.name AS artist_name, count(*) AS cnt
+    FROM songplays sp
+    JOIN artists a
+      ON sp.artist_id = a.artist_id
+GROUP BY 1, 2
+ORDER BY 3 DESC
+   LIMIT 10;
